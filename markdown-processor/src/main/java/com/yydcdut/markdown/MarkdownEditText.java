@@ -33,6 +33,7 @@ import com.yydcdut.markdown.live.LivePrepare;
 import com.yydcdut.markdown.span.MDImageSpan;
 import com.yydcdut.markdown.syntax.SyntaxFactory;
 import com.yydcdut.markdown.syntax.text.TextFactory;
+import com.yydcdut.markdown.utils.CommonUtils;
 
 import java.util.ArrayList;
 
@@ -110,6 +111,7 @@ public class MarkdownEditText extends EditText implements Handler.Callback {
     /**
      * clear markdown format
      */
+    @SuppressWarnings("unused")
     public void clear() {
         removeTextChangedListener(mEditTextWatcher);
         Editable editable = getText();
@@ -221,6 +223,21 @@ public class MarkdownEditText extends EditText implements Handler.Callback {
                     mListeners.remove(i);
                 }
             }
+        }
+    }
+
+    @Override
+    public void setSelection(int start, int stop) {
+        int len = getText().length();
+        if (CommonUtils.INSTANCE.checkIndex(start, len) && CommonUtils.INSTANCE.checkIndex(stop, len)) {
+            super.setSelection(start, stop);
+        }
+    }
+
+    @Override
+    public void setSelection(int index) {
+        if (CommonUtils.INSTANCE.checkIndex(index, getText().length())) {
+            super.setSelection(index);
         }
     }
 

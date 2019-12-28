@@ -17,6 +17,7 @@ package com.yydcdut.markdown.utils;
 
 import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
@@ -53,7 +54,7 @@ public class SyntaxUtils {
      * @param callback span callback
      * @return the content after parsing
      */
-    public static SpannableStringBuilder parseBoldAndItalic(@NonNull String key, @NonNull SpannableStringBuilder ssb, @NonNull OnWhatSpanCallback callback) {
+    public static SpannableStringBuilder parseBoldAndItalic(@NonNull String key, @NonNull SpannableStringBuilder ssb, @Nullable OnWhatSpanCallback callback) {
         if (callback == null) {
             return ssb;
         }
@@ -64,12 +65,12 @@ public class SyntaxUtils {
         while (true) {
             int positionHeader = SyntaxUtils.findPosition(key, tmpTotal, ssb, tmp);
             if (positionHeader == -1) {
-                tmp.append(tmpTotal.substring(0, tmpTotal.length()));
+                tmp.append(tmpTotal);
                 break;
             }
             tmp.append(tmpTotal.substring(0, positionHeader));
             int index = tmp.length();
-            tmpTotal = tmpTotal.substring(positionHeader + keyLength, tmpTotal.length());
+            tmpTotal = tmpTotal.substring(positionHeader + keyLength);
             int positionFooter = SyntaxUtils.findPosition(key, tmpTotal, ssb, tmp);
             if (positionFooter != -1) {
                 ssb.delete(tmp.length(), tmp.length() + keyLength);
@@ -78,10 +79,10 @@ public class SyntaxUtils {
                 ssb.delete(tmp.length(), tmp.length() + keyLength);
             } else {
                 tmp.append(key);
-                tmp.append(tmpTotal.substring(0, tmpTotal.length()));
+                tmp.append(tmpTotal);
                 break;
             }
-            tmpTotal = tmpTotal.substring(positionFooter + keyLength, tmpTotal.length());
+            tmpTotal = tmpTotal.substring(positionFooter + keyLength);
         }
         return ssb;
     }
@@ -96,15 +97,14 @@ public class SyntaxUtils {
      * @return the next position of key
      */
     private static int findPosition(@NonNull String key, @NonNull String tmpTotal, @NonNull SpannableStringBuilder ssb, @NonNull SpannableStringBuilder tmp) {
-        String tmpTmpTotal = tmpTotal;
-        int position = tmpTmpTotal.indexOf(key);
+        int position = tmpTotal.indexOf(key);
         if (position == -1) {
             return -1;
         } else {
             if (existCodeSyntax(ssb, tmp.length() + position, key.length())) {//key是否在code中
-                StringBuilder sb = new StringBuilder(tmpTmpTotal.substring(0, position))
-                        .append("$$").append(tmpTmpTotal.substring(position + key.length(), tmpTmpTotal.length()));
-                return findPosition(key, sb.toString(), ssb, tmp);
+                String sb = tmpTotal.substring(0, position) +
+                        "$$" + tmpTotal.substring(position + key.length());
+                return findPosition(key, sb, ssb, tmp);
             } else {
                 return position;
             }
@@ -170,7 +170,7 @@ public class SyntaxUtils {
      * @param pattern    the pattern string
      * @param ignoreText the replace string
      * @param callback   the callback to get span
-     * @return
+     * @return List of EditToken
      */
     public static List<EditToken> parse(@NonNull Editable editable, @NonNull String pattern, String ignoreText, OnWhatSpanCallback callback) {
         StringBuilder content = new StringBuilder(editable.toString().replace(ignoreText, TextHelper.getPlaceHolder(ignoreText)));
@@ -261,7 +261,7 @@ public class SyntaxUtils {
         ssb.setSpan(new ImageSpan(bitmap), 0, endPosition, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         ssb.setSpan(new ClickableSpan() {
             @Override
-            public void onClick(View widget) {
+            public void onClick(@NonNull View widget) {
                 if (onTodoClickListener != null) {
                     onTodoClickListener.onTodoClicked(widget, ssb);
                 }

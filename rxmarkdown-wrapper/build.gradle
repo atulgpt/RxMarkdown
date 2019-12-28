@@ -1,4 +1,6 @@
 apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -28,7 +30,11 @@ dependencies {
     implementation 'io.reactivex:rxjava:1.1.5'
     implementation 'io.reactivex:rxandroid:1.2.0'
     implementation project(':markdown-processor')
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 }
 
 apply from: './publish.gradle'
+repositories {
+    mavenCentral()
+}
 
