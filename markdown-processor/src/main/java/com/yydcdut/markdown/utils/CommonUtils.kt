@@ -10,6 +10,6 @@ object CommonUtils {
 //    }
 
     fun checkIndex(index: Int, length: Int): Boolean {
-        return !(index < 0 || index >= length)
+        return !(index < 0 || index > length)
     }
 }
