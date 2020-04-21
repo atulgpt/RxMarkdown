@@ -5,7 +5,7 @@
               android:gravity="center_horizontal"
               android:orientation="vertical">
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="192dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp">
@@ -16,9 +16,9 @@
             android:layout_height="wrap_content"
             android:hint="描述"
             android:textColor="@android:color/black"/>
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="192dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="5dp">
@@ -30,5 +30,5 @@
             android:hint="链接"
             android:text="http://"
             android:textColor="@android:color/black"/>
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>
