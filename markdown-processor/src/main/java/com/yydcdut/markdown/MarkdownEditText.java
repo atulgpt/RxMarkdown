@@ -43,7 +43,6 @@ import java.util.ArrayList;
  * Created by yuyidong on 16/5/20.
  */
 public class MarkdownEditText extends EditText implements Handler.Callback {
-    private static final String TAG = MarkdownEditText.class.getName();
 
     private static final int MSG_BEFORE_TEXT_CHANGED = 1;
     private static final int MSG_ON_TEXT_CHANGED = 2;
@@ -198,6 +197,30 @@ public class MarkdownEditText extends EditText implements Handler.Callback {
                 sendMessage(MSG_AFTER_TEXT_CHANGED, s, 0, 0, 0);
             }
         }
+
+        private CharSequence format() {
+            if (mGrammarFactory == null) {
+                return getText();
+            }
+            Editable editable = getText();
+            return mGrammarFactory.parse(editable, mMarkdownConfiguration);
+        }
+
+        private boolean isMainThread() {
+            return Thread.currentThread() == Looper.getMainLooper().getThread();
+        }
+
+        private void sendMessage(int what, CharSequence s, int start, int before, int after) {
+            Message message = mHandler.obtainMessage();
+            Bundle bundle = new Bundle();
+            bundle.putCharSequence(BUNDLE_CHAR_SEQUENCE, s);
+            bundle.putInt(BUNDLE_START, start);
+            bundle.putInt(BUNDLE_BEFORE, before);
+            bundle.putInt(BUNDLE_AFTER, after);
+            message.what = what;
+            message.setData(bundle);
+            mHandler.sendMessage(message);
+        }
     }
 
     @Override
@@ -294,16 +317,6 @@ public class MarkdownEditText extends EditText implements Handler.Callback {
         }
     }
 
-    private CharSequence format() {
-        if (mGrammarFactory == null) {
-            return getText();
-        }
-        Editable editable = getText();
-        long begin = System.currentTimeMillis();
-        CharSequence charSequence = mGrammarFactory.parse(editable, mMarkdownConfiguration);
-        return charSequence;
-    }
-
     private void setEditableText(CharSequence charSequence) {
         int selectionEnd = getSelectionEnd();
         int selectionStart = getSelectionStart();
@@ -311,10 +324,6 @@ public class MarkdownEditText extends EditText implements Handler.Callback {
         setText(charSequence);
         addTextChangedListener(mEditTextWatcher);
         setSelection(selectionStart, selectionEnd);
-    }
-
-    private boolean isMainThread() {
-        return Thread.currentThread() == Looper.getMainLooper().getThread();
     }
 
     @Override
@@ -372,18 +381,6 @@ public class MarkdownEditText extends EditText implements Handler.Callback {
         return false;
     }
 
-    private void sendMessage(int what, CharSequence s, int start, int before, int after) {
-        Message message = mHandler.obtainMessage();
-        Bundle bundle = new Bundle();
-        bundle.putCharSequence(BUNDLE_CHAR_SEQUENCE, s);
-        bundle.putInt(BUNDLE_START, start);
-        bundle.putInt(BUNDLE_BEFORE, before);
-        bundle.putInt(BUNDLE_AFTER, after);
-        message.what = what;
-        message.setData(bundle);
-        mHandler.sendMessage(message);
-    }
-
     @Override
     protected void onSelectionChanged(int selStart, int selEnd) {
         super.onSelectionChanged(selStart, selEnd);
@@ -436,7 +433,7 @@ public class MarkdownEditText extends EditText implements Handler.Callback {
     }
 
     @Override
-    public void invalidateDrawable(Drawable dr) {
+    public void invalidateDrawable(@NonNull Drawable dr) {
         if (mGrammarFactory instanceof TextFactory && mHasImageInText) {
             invalidate();
         } else {

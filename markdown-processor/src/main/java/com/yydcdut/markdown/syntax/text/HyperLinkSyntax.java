@@ -48,7 +48,7 @@ class HyperLinkSyntax extends TextSyntaxAdapter {
     private boolean isUnderLine;
     private OnLinkClickCallback mOnLinkClickCallback;
 
-    public HyperLinkSyntax(@NonNull MarkdownConfiguration markdownConfiguration) {
+    HyperLinkSyntax(@NonNull MarkdownConfiguration markdownConfiguration) {
         super(markdownConfiguration);
         mColor = markdownConfiguration.getLinkFontColor();
         isUnderLine = markdownConfiguration.isShowLinkUnderline();
@@ -60,16 +60,16 @@ class HyperLinkSyntax extends TextSyntaxAdapter {
         return contains(text) ? Pattern.compile(PATTERN).matcher(text).matches() : Pattern.compile(AUTO_LINK_PATTERN).matcher(text).find();
     }
 
-    @NonNull
     @Override
     boolean encode(@NonNull SpannableStringBuilder ssb) {
-        boolean isHandledBackSlash = false;
-        isHandledBackSlash |= replace(ssb, SyntaxKey.KEY_HYPER_LINK_BACKSLASH_LEFT, CharacterProtector.getKeyEncode());
+        boolean isHandledBackSlash;
+        isHandledBackSlash = replace(ssb, SyntaxKey.KEY_HYPER_LINK_BACKSLASH_LEFT, CharacterProtector.getKeyEncode());
         isHandledBackSlash |= replace(ssb, SyntaxKey.KEY_HYPER_LINK_BACKSLASH_MIDDLE, CharacterProtector.getKeyEncode1());
         isHandledBackSlash |= replace(ssb, SyntaxKey.KEY_HYPER_LINK_BACKSLASH_RIGHT, CharacterProtector.getKeyEncode3());
         return isHandledBackSlash;
     }
 
+    @NonNull
     @Override
     SpannableStringBuilder format(@NonNull SpannableStringBuilder ssb, int lineNumber) {
         parse(ssb);
@@ -77,7 +77,6 @@ class HyperLinkSyntax extends TextSyntaxAdapter {
         return ssb;
     }
 
-    @NonNull
     @Override
     void decode(@NonNull SpannableStringBuilder ssb) {
         replace(ssb, CharacterProtector.getKeyEncode(), SyntaxKey.KEY_HYPER_LINK_BACKSLASH_LEFT);
@@ -88,8 +87,8 @@ class HyperLinkSyntax extends TextSyntaxAdapter {
     /**
      * check the key, whether the text contains hyper link keys
      *
-     * @param text
-     * @return
+     * @param text Text which needs to be searched
+     * @return Result if it contains or not
      */
     private static boolean contains(String text) {
         if (text.length() < 4 || TextUtils.equals(text, SyntaxKey.KEY_HYPER_LINK_EMPTY)) {
@@ -127,7 +126,6 @@ class HyperLinkSyntax extends TextSyntaxAdapter {
      *
      * @param ssb the original content
      */
-    @NonNull
     private void parse(@NonNull SpannableStringBuilder ssb) {
         String text = ssb.toString();
         SpannableStringBuilder tmp = new SpannableStringBuilder();
@@ -147,27 +145,27 @@ class HyperLinkSyntax extends TextSyntaxAdapter {
                 int positionHeader = tmpLeft.lastIndexOf(SyntaxKey.KEY_HYPER_LINK_LEFT);
                 tmp.append(tmpTotal.substring(0, positionHeader));
                 int index = tmp.length();
-                tmpTotal = tmpTotal.substring(positionHeader + SyntaxKey.KEY_HYPER_LINK_LEFT.length(), tmpTotal.length());
+                tmpTotal = tmpTotal.substring(positionHeader + SyntaxKey.KEY_HYPER_LINK_LEFT.length());
                 int positionCenter = tmpTotal.indexOf(SyntaxKey.KEY_HYPER_LINK_MIDDLE);
                 ssb.delete(tmp.length(), tmp.length() + SyntaxKey.KEY_HYPER_LINK_LEFT.length());
                 tmp.append(tmpTotal.substring(0, positionCenter));
-                tmpTotal = tmpTotal.substring(positionCenter + SyntaxKey.KEY_HYPER_LINK_MIDDLE.length(), tmpTotal.length());
+                tmpTotal = tmpTotal.substring(positionCenter + SyntaxKey.KEY_HYPER_LINK_MIDDLE.length());
                 int positionFooter = tmpTotal.indexOf(SyntaxKey.KEY_HYPER_LINK_RIGHT);
                 String link = tmpTotal.substring(0, positionFooter);
                 ssb.setSpan(new MDURLSpan(link, mColor, isUnderLine, mOnLinkClickCallback), index, tmp.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
                 ssb.delete(tmp.length(), tmp.length() + SyntaxKey.KEY_HYPER_LINK_MIDDLE.length() + link.length() + SyntaxKey.KEY_HYPER_LINK_RIGHT.length());
-                tmpTotal = tmpTotal.substring(positionFooter + SyntaxKey.KEY_HYPER_LINK_RIGHT.length(), tmpTotal.length());
-            } else if (position4Key0 < position4Key1 && position4Key0 < position4Key2 && position4Key2 < position4Key1) {
+                tmpTotal = tmpTotal.substring(positionFooter + SyntaxKey.KEY_HYPER_LINK_RIGHT.length());
+            } else if (position4Key0 < position4Key2 && position4Key2 < position4Key1) {
                 //111[22)22](33333)
                 tmpTotal = replaceFirstOne(tmpTotal, SyntaxKey.KEY_HYPER_LINK_RIGHT, SyntaxKey.PLACE_HOLDER);
             } else if (position4Key1 < position4Key0 && position4Key1 < position4Key2) {
                 //](在最前面的情况 111](2222[333)4444  1111](2222)3333[4444
                 tmp.append(tmpTotal.substring(0, position4Key1 + SyntaxKey.KEY_HYPER_LINK_MIDDLE.length()));
-                tmpTotal = tmpTotal.substring(position4Key1 + SyntaxKey.KEY_HYPER_LINK_MIDDLE.length(), tmpTotal.length());
+                tmpTotal = tmpTotal.substring(position4Key1 + SyntaxKey.KEY_HYPER_LINK_MIDDLE.length());
             } else if (position4Key2 < position4Key0 && position4Key2 < position4Key1) {
                 //)在最前面的情况 111)2222](333[4444  1111)2222[3333](4444
                 tmp.append(tmpTotal.substring(0, position4Key2 + SyntaxKey.KEY_HYPER_LINK_RIGHT.length()));
-                tmpTotal = tmpTotal.substring(position4Key2 + SyntaxKey.KEY_HYPER_LINK_RIGHT.length(), tmpTotal.length());
+                tmpTotal = tmpTotal.substring(position4Key2 + SyntaxKey.KEY_HYPER_LINK_RIGHT.length());
             }
         }
     }
@@ -198,11 +196,9 @@ class HyperLinkSyntax extends TextSyntaxAdapter {
             if (i == count - 1) {
                 break;
             }
-            StringBuilder sb = new StringBuilder();
-            sb.append(text.substring(0, index));
-            sb.append(TextHelper.getPlaceHolder(url));
-            sb.append(text.substring(index + url.length()));
-            text = sb.toString();
+            text = text.substring(0, index) +
+                    TextHelper.getPlaceHolder(url) +
+                    text.substring(index + url.length());
         }
     }
 
@@ -212,11 +208,11 @@ class HyperLinkSyntax extends TextSyntaxAdapter {
      * @param content     the original content
      * @param target      the key words
      * @param replacement the replacement string
-     * @return
+     * @return Replaced string
      */
     @NonNull
     private static String replaceFirstOne(@NonNull String content, @NonNull String target, @NonNull String replacement) {
-        int matchStart = content.indexOf(target, 0);
+        int matchStart = content.indexOf(target);
         if (matchStart == -1) {
             return content;
         }
